@@ -1,238 +1,337 @@
-# Constrular — Sistema de Gestão para Loja de Material de Construção
+# Constrular — Sistema de Gestão Comercial
 
 [![Testes](https://github.com/mahaule/Constrular/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mahaule/Constrular/actions/workflows/tests.yml)
 
-Sistema de linha de comando (CLI) em Python para gestão de uma loja de
-materiais de construção: cadastro de produtos, clientes, fornecedores
-e funcionários, controle de estoque, registro de vendas e relatórios
-gerenciais. Os dados são persistidos em um banco MySQL.
+Sistema de linha de comando (CLI) desenvolvido em Python para a gestão de uma loja de materiais de construção, com banco de dados MySQL, controle de estoque, registro de vendas e relatórios gerenciais.
 
-Projeto acadêmico desenvolvido com arquitetura em camadas
-(config → models → repositories → services → menu), pensado também
-como base de dados para análises em **Power BI**.
+O projeto também oferece consultas analíticas e geração de arquivos CSV para apoiar a criação de dashboards no Power BI.
 
-## Arquitetura
+## Funcionalidades
 
+- **Produtos:** cadastro, consulta, atualização e exclusão.
+- **Clientes:** gerenciamento de clientes.
+- **Fornecedores:** cadastro e consulta de fornecedores.
+- **Funcionários:** gerenciamento de funcionários e salários.
+- **Vendas:** registro de vendas, inclusão de itens e consulta de informações.
+- **Estoque:** consulta de estoque e registro de entradas e saídas.
+- **Relatórios:** total de vendas, faturamento, produtos mais vendidos e estoque baixo.
+- **Análises de dados:** consultas SQL para análise financeira, comercial e operacional.
+- **Dados mockados:** geração de histórico fictício para explorar tendências, sazonalidade e indicadores no Power BI.
+
+## Tecnologias utilizadas
+
+- Python 3.11+
+- MySQL 8.0+
+- SQL
+- pandas
+- pytest
+- python-dotenv
+- Git e GitHub Actions
+- Power BI Desktop — para visualização e análise dos dados
+
+## Arquitetura do projeto
+
+O sistema utiliza uma arquitetura organizada em camadas, separando a interface de terminal, as regras de negócio e o acesso ao banco de dados.
+
+```text
+Constrular/
+├── .github/
+│   └── workflows/
+│       └── tests.yml
+├── database/
+│   └── constrular.sql
+├── scripts/
+│   └── popular_banco.py
+├── src/
+│   ├── config/
+│   │   └── database.py
+│   ├── models/
+│   ├── queries/
+│   │   └── relatorios.py
+│   ├── repositories/
+│   ├── services/
+│   └── main.py
+├── tests/
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── README.md
+├── requirements.txt
+└── requirements-dev.txt
 ```
-src/
-├── config/         # Conexão com o banco (variáveis de ambiente)
-├── models/         # Dataclasses que representam as entidades do domínio
-├── repositories/    # Acesso direto ao banco (SQL puro)
-├── services/        # Regras de negócio e validações
-├── queries/          # Consultas analíticas (pandas) para exportação/Power BI
-└── main.py          # Menu interativo (camada de apresentação)
 
-scripts/
-└── popular_banco.py # Gera dados mockados (12 meses de histórico)
+### Responsabilidades das camadas
 
-database/
-└── constrular.sql   # Schema completo + views + 5 registros de exemplo
+- **Config:** configuração da conexão com o banco de dados.
+- **Models:** classes que representam as entidades do domínio.
+- **Repositories:** execução de consultas SQL e operações de persistência.
+- **Services:** regras de negócio e validações.
+- **Queries:** consultas analíticas que retornam DataFrames e permitem exportação para CSV.
+- **Main:** menu interativo que permite utilizar as funcionalidades pelo terminal.
+- **Scripts:** geração de dados fictícios para análises.
+- **Tests:** testes automatizados e scripts de demonstração das funcionalidades.
 
-tests/                # Testes automatizados (pytest) + scripts de
-                       # demonstração manual das funcionalidades
-```
+O fluxo principal de execução é:
 
-Fluxo de dependência: `main.py` → `services` → `repositories` → `config`.
-Cada camada só conhece a camada imediatamente abaixo dela, o que facilita
-manutenção e testes.
+`main.py → services → repositories → config`
 
 ## Pré-requisitos
 
-- Python 3.11+
-- MySQL Server 8.0+ (local ou remoto)
+Antes de executar o projeto, instale:
 
-## Configuração
+- Python 3.11 ou superior.
+- MySQL Server 8.0 ou superior.
+- Git.
 
-1. Clone o repositório e crie um ambiente virtual:
+Para utilizar a conexão direta do Power BI Desktop com o MySQL, também pode ser necessário instalar o Oracle MySQL Connector/NET.
 
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate   # Windows
-   source .venv/bin/activate  # Linux/Mac
-   ```
+## Configuração e instalação
 
-2. Instale as dependências:
+### 1. Clone o repositório
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+git clone https://github.com/mahaule/Constrular.git
+cd Constrular
+```
 
-3. Copie `.env.example` para `.env` e preencha com as credenciais do
-   seu banco local:
+### 2. Crie e ative o ambiente virtual
 
-   ```bash
-   cp .env.example .env
-   ```
+**Windows — PowerShell:**
 
-   > ⚠️ **Nunca** faça commit do arquivo `.env` com a senha real —
-   > ele já está no `.gitignore`.
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-4. Crie o schema e os dados de exemplo executando o script SQL:
+**Linux ou macOS:**
 
-   ```bash
-   mysql -u root -p < database/constrular.sql
-   ```
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
 
-   Isso cria o banco `constrular` com todas as tabelas, views e um
-   pequeno conjunto de dados de exemplo (5 registros por tabela).
+### 3. Instale as dependências
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Para instalar também as dependências de desenvolvimento e testes:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+### 4. Configure as variáveis de ambiente
+
+Copie o arquivo `.env.example` para um novo arquivo chamado `.env`.
+
+**Windows — PowerShell:**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+**Linux ou macOS:**
+
+```bash
+cp .env.example .env
+```
+
+Abra o arquivo `.env` e configure as credenciais do seu MySQL:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=sua_senha
+DB_NAME=constrular
+```
+
+Substitua `sua_senha` pela senha do seu usuário MySQL.
+
+> **Segurança:** nunca publique o arquivo `.env` com sua senha real. Ele está protegido pelo `.gitignore`. O arquivo `.env.example` deve ser utilizado como modelo, sem credenciais reais.
+
+### 5. Crie e importe o banco de dados
+
+Primeiro, crie o schema no MySQL Workbench executando:
+
+```sql
+CREATE DATABASE IF NOT EXISTS constrular
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_0900_ai_ci;
+```
+
+Em seguida:
+
+1. Atualize a lista de schemas do Workbench.
+2. Selecione o schema `constrular` como schema padrão.
+3. Abra o arquivo `database/constrular.sql`.
+4. Confirme que o schema padrão selecionado é `constrular` antes de executar o script inteiro.
+
+O arquivo SQL cria as tabelas, insere os dados iniciais e define as views utilizadas nas análises.
+
+> **Atenção:** o script contém comandos que apagam e recriam tabelas e views. Importe-o em um schema de teste vazio para não perder dados importantes. O dump não cria nem seleciona automaticamente o schema de destino.
 
 ## Como executar o sistema
 
-A partir da raiz do projeto (para que os imports `src.*` funcionem):
+Com o banco configurado, o MySQL em execução e o arquivo `.env` preenchido, execute a partir da raiz do projeto:
 
 ```bash
 python -m src.main
 ```
 
-Isso abre o menu interativo no terminal com as opções de Produtos,
-Clientes, Fornecedores, Funcionários, Vendas, Estoque e Relatórios.
+O sistema abre um menu interativo no terminal, com opções para gerenciar produtos, clientes, fornecedores, funcionários, vendas e estoque, além de consultar relatórios.
 
 ## Gerando dados mockados para o Power BI
 
-O dump SQL original traz apenas 5 registros por tabela — suficiente
-para testar o sistema, mas insuficiente para gráficos de tendência,
-sazonalidade ou ranking em um dashboard. Para isso, existe o script:
+O banco inicial contém um conjunto pequeno de dados fictícios, suficiente para testar as funcionalidades básicas, mas limitado para análises de tendências, sazonalidade e rankings.
+
+Para ampliar a base de dados, execute:
 
 ```bash
 python -m scripts.popular_banco
 ```
 
-Ele **adiciona** (sem apagar nada) ao banco já existente:
+O script solicita confirmação antes de começar e adiciona dados fictícios ao banco configurado no `.env`, incluindo:
 
-- 12 meses de histórico de vendas, com sazonalidade simples
-  (mais vendas em novembro/dezembro, menos em fevereiro);
-- ~75 clientes distribuídos em cidades do Vale do Paraíba;
-- 30 produtos novos distribuídos nas 5 categorias já existentes;
-- 5 fornecedores novos;
-- 7 funcionários novos com salários variados por cargo;
-- centenas de vendas com itens e preços variando ±5% (simulando
-  negociação/promoções);
-- movimentações de estoque (entradas e saídas) consistentes, sem
-  nunca deixar o estoque simulado ficar negativo.
+- Aproximadamente 12 meses de histórico de vendas.
+- Cerca de 75 clientes distribuídos em cidades do Vale do Paraíba.
+- 30 produtos adicionais, distribuídos nas categorias existentes.
+- Cinco fornecedores adicionais.
+- Sete funcionários adicionais, com diferentes cargos e salários.
+- Centenas de vendas, com vários itens e preços que simulam pequenas variações comerciais.
+- Movimentações de estoque de entrada e saída, considerando o estoque disponível durante a simulação.
 
-O script pede confirmação antes de rodar, e desfaz tudo automaticamente
-(`ROLLBACK`) caso algum erro ocorra no meio do processo.
+O histórico inclui uma variação sazonal simples, com maior volume de vendas previsto para novembro e dezembro e menor volume em fevereiro.
+
+O script utiliza uma transação para inserir os dados e executa `ROLLBACK` quando ocorre um erro durante a operação.
+
+> **Importante:** execute o script apenas uma vez em cada banco preparado. Ele acrescenta registros e pode duplicar dados se for executado novamente. Se precisar repetir a simulação, utilize um banco de teste recriado a partir do dump inicial.
 
 ## Exportando relatórios para o Power BI
 
-Além dos relatórios simples do menu (`src/services/relatorio_service.py`),
-o projeto tem um módulo de relatórios analíticos que devolve os dados
-como `pandas.DataFrame`, prontos para virar CSV:
+O módulo `src/queries/relatorios.py` disponibiliza consultas analíticas que retornam DataFrames do pandas e podem ser exportados para CSV.
+
+Execute:
 
 ```bash
 python -m src.queries.relatorios
 ```
 
-Isso gera uma pasta `relatorios_exportados/` na raiz do projeto com um
-CSV para cada relatório:
+Os arquivos são gerados na pasta `relatorios_exportados/`, na raiz do projeto.
 
-| Arquivo                          | Conteúdo                                             |
-|-----------------------------------|-------------------------------------------------------|
-| `faturamento_mensal.csv`          | Faturamento, custo e lucro por mês                     |
-| `faturamento_por_categoria.csv`   | Faturamento e lucro por categoria de produto           |
-| `vendas_por_cidade.csv`           | Faturamento por cidade do cliente                      |
-| `ticket_medio_mensal.csv`         | Ticket médio por mês                                   |
-| `desempenho_funcionarios.csv`     | Vendas, faturamento e ticket médio por funcionário     |
-| `top_clientes.csv`                | Ranking dos clientes que mais compraram                |
-| `ranking_margem_produtos.csv`     | Margem de lucro por produto                             |
-| `formas_pagamento_mensal.csv`     | Distribuição de faturamento por forma de pagamento     |
-| `situacao_estoque.csv`            | Estoque atual, status e valor de custo parado          |
-| `folha_pagamento_por_cargo.csv`   | Total de salários e headcount por cargo                |
+| Arquivo CSV | Conteúdo |
+|---|---|
+| `faturamento_mensal.csv` | Faturamento, custo e lucro por mês |
+| `faturamento_por_categoria.csv` | Faturamento e lucro por categoria |
+| `vendas_por_cidade.csv` | Faturamento por cidade do cliente |
+| `ticket_medio_mensal.csv` | Ticket médio mensal |
+| `desempenho_funcionarios.csv` | Vendas, faturamento e ticket médio por funcionário |
+| `top_clientes.csv` | Ranking dos clientes que mais compraram |
+| `ranking_margem_produtos.csv` | Margem de lucro por produto |
+| `formas_pagamento_mensal.csv` | Faturamento por forma de pagamento e mês |
+| `situacao_estoque.csv` | Estoque atual, status e valor de custo parado |
+| `folha_pagamento_por_cargo.csv` | Total de salários e quantidade de funcionários por cargo |
 
-No Power BI Desktop: **Obter Dados > Texto/CSV**, selecione os arquivos
-desejados e monte suas visualizações. Alternativamente, é possível
-conectar o Power BI diretamente ao MySQL (**Obter Dados > Banco de
-Dados MySQL**) e usar as *views* já criadas no `database/constrular.sql`
-(`vw_vendas`, `vw_estoque`, `vw_analise_financeira`, etc.) como fonte
-direta.
+### Opção 1 — Importar arquivos CSV
+
+No Power BI Desktop, selecione **Obter dados → Texto/CSV**, escolha os arquivos desejados e carregue os dados para construir os relatórios.
+
+### Opção 2 — Conectar diretamente ao MySQL
+
+Também é possível conectar o Power BI Desktop diretamente ao banco de dados MySQL.
+
+Selecione **Obter dados → Banco de dados MySQL** e utilize o servidor, o nome do banco e as credenciais correspondentes ao seu ambiente.
+
+O banco disponibiliza as seguintes views analíticas:
+
+- `vw_vendas`
+- `vw_estoque`
+- `vw_analise_financeira`
+- `vw_produtos_mais_vendidos`
+- `vw_faturamento_funcionarios`
+- `vw_faturamento_pagamento`
+
+Essas views podem servir como fonte para gráficos de faturamento, rentabilidade, produtos mais vendidos, desempenho comercial e controle de estoque.
 
 ## Validações de negócio
 
-A camada de serviços (`src/services/`) valida os dados antes de
-persistir no banco, entre elas:
+A camada `services` valida os dados antes de persistir as informações no banco.
 
-- Funcionário: nome e cargo obrigatórios; **salário não pode ser
-  negativo nem zero**.
-- Produto: preço de custo e de venda não podem ser negativos; preço
-  de venda não pode ser menor que o de custo.
-- Cliente/Fornecedor: nome obrigatório; estado com 2 letras.
-- Estoque: quantidade de entrada/saída deve ser maior que zero; saída
-  não pode ultrapassar o estoque disponível.
-- Venda: forma de pagamento obrigatória; cliente e funcionário
-  informados precisam existir no banco.
-- Item de venda: produto informado precisa existir; quantidade e
-  preço unitário não podem ser inválidos.
+Entre as regras implementadas estão:
 
-Quando uma validação falha, o serviço levanta um `ValueError` com uma
-mensagem clara, capturado pelo menu (`src/main.py`), que exibe o erro
-sem derrubar o programa.
+- **Funcionários:** nome e cargo obrigatórios; salário deve ser positivo.
+- **Produtos:** preços não negativos e preço de venda não inferior ao preço de custo.
+- **Clientes e fornecedores:** nome obrigatório e validações dos campos informados, incluindo o estado.
+- **Estoque:** entradas e saídas com quantidades positivas; saídas limitadas pelo estoque disponível.
+- **Vendas:** forma de pagamento obrigatória e validação da existência de clientes e funcionários informados.
+- **Itens de venda:** validação do produto, da quantidade e do preço unitário.
+
+Quando uma validação falha, os serviços lançam `ValueError` com uma mensagem explicativa para que o menu possa apresentar o erro ao usuário.
 
 ## Robustez e tratamento de erros
 
-- **Entrada inválida não derruba o sistema.** O loop principal do menu
-  (`src/main.py`) tem um `try/except` que captura tanto `ValueError`
-  (ex: digitar uma letra onde era esperado um número) quanto qualquer
-  outro erro inesperado (ex: erro de conexão ou de integridade do
-  banco, como um CPF duplicado). O sistema volta para o menu principal
-  em vez de fechar.
-- **Sem vazamento de conexão.** Todas as funções em `src/repositories/`
-  usam o context manager `obter_cursor()` (definido em
-  `src/config/database.py`), que garante o fechamento do cursor e da
-  conexão mesmo se ocorrer um erro no meio da query — e faz
-  `commit`/`rollback` automaticamente para operações de escrita.
-- **Validação das variáveis de ambiente.** Se o `.env` não estiver
-  configurado corretamente, `conectar()` levanta um erro claro
-  indicando quais variáveis estão faltando, em vez de um erro genérico
-  do driver MySQL.
+O projeto inclui mecanismos para tornar a execução mais segura:
 
-## Testes automatizados
+- Tratamento de entradas inválidas e erros inesperados no menu.
+- Gerenciamento centralizado de conexões e cursores por meio de `obter_cursor()`, em `src/config/database.py`.
+- Fechamento de conexões e cursores mesmo quando uma consulta falha.
+- `commit` para operações de escrita e `rollback` em caso de erro durante transações gerenciadas pelo context manager.
+- Verificação das variáveis obrigatórias do arquivo `.env`, com mensagens indicando as configurações ausentes.
 
-O projeto tem dois tipos de teste em `tests/`:
+## Testes
 
-- **`test_validacoes.py`** — testes de verdade com `pytest` e `assert`,
-  usando `monkeypatch` para simular o banco. Rodam em qualquer máquina,
-  sem precisar de MySQL configurado, e cobrem as regras de negócio
-  descritas acima (salário negativo, preços inválidos, FK inexistente,
-  estoque insuficiente, etc). Para rodar:
+O projeto possui testes automatizados e scripts de demonstração manual.
 
-  ```bash
-  pip install -r requirements-dev.txt
-  pytest tests/test_validacoes.py -v
-  ```
+### Testes automatizados
 
-- **`test_estoque.py`, `test_vendas.py`, `test_item_venda.py`,
-  `test_consulta_venda.py`, `test_produtos.py`** — scripts de
-  demonstração manual (com `print`, sem `assert`) que exercitam os
-  fluxos reais contra um banco MySQL configurado no `.env`. Servem
-  para validar a integração de ponta a ponta, não como suíte
-  automatizada. Para rodá-los, a partir da raiz do projeto:
+O arquivo `tests/test_validacoes.py` contém 29 testes com pytest, cobrindo as regras de negócio e utilizando simulações para testar os serviços sem depender de uma conexão real com o MySQL.
 
-  ```bash
-  python -m tests.test_estoque
-  ```
+Para executar:
 
-## Integração contínua (CI)
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest tests/test_validacoes.py -v
+```
 
-O repositório tem um workflow do GitHub Actions
-(`.github/workflows/tests.yml`) que roda automaticamente a cada
-`push` ou pull request:
+### Demonstrações manuais
 
-1. Instala as dependências de `requirements-dev.txt`;
-2. Roda `pytest tests/test_validacoes.py -v` (os 29 testes de
-   validação, sem precisar de banco);
-3. Verifica se todos os arquivos `.py` do projeto compilam sem erro
-   de sintaxe.
+Os arquivos `test_estoque.py`, `test_vendas.py`, `test_item_venda.py`, `test_consulta_venda.py` e `test_produtos.py` demonstram operações reais do sistema.
 
-Testa em Python 3.11 e 3.12. Depois de subir o projeto para o GitHub,
-troque `SEU_USUARIO/SEU_REPOSITORIO` no badge no topo deste README
-pelo caminho real do seu repositório, para o selo aparecer.
+Esses scripts utilizam o banco configurado no `.env` e podem inserir ou modificar dados. Execute-os somente em um banco de desenvolvimento ou teste.
+
+Exemplo:
+
+```bash
+python -m tests.test_estoque
+```
+
+## Integração contínua
+
+O projeto utiliza GitHub Actions por meio do workflow `.github/workflows/tests.yml`.
+
+O pipeline é executado em eventos de `push`, pull requests e também pode ser iniciado manualmente pela aba **Actions** do GitHub.
+
+As etapas incluem:
+
+1. Configuração dos ambientes Python 3.11 e 3.12.
+2. Instalação das dependências de desenvolvimento.
+3. Execução dos testes automatizados de validação.
+4. Verificação de sintaxe dos arquivos Python.
+
+O selo de testes no início deste README exibe o status do workflow configurado para o repositório.
+
+## Segurança dos dados
+
+Os dados utilizados para demonstração devem ser fictícios. Não publique senhas, credenciais de conexão, dados pessoais reais ou informações de clientes.
+
+O arquivo `.env` é ignorado pelo Git, enquanto o `.env.example` contém apenas os nomes das variáveis necessárias para configurar a conexão.
 
 ## Autor
 
-Projeto acadêmico desenvolvido por Renan, aluno de Análise e
-Desenvolvimento de Sistemas na FATEC Guaratinguetá.
+Projeto acadêmico desenvolvido por **Renan dos Santos Freitas**, estudante de Análise e Desenvolvimento de Sistemas na FATEC Guaratinguetá.
 
 ## Licença
 
-Este projeto está sob a licença MIT — veja o arquivo [LICENSE](LICENSE)
-para mais detalhes.
+Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais informações.
