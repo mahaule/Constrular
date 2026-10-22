@@ -1,0 +1,9 @@
+# Normaliza o fim de linha para LF no repositório, independente do
+# sistema operacional de quem estiver commitando (Windows/Linux/Mac).
+* text=auto eol=lf
+
+# Arquivos binários — nunca devem passar por conversão de fim de linha.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary

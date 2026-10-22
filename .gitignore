@@ -1,0 +1,27 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Variáveis de ambiente (contém credenciais - nunca commitar)
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+
+# Relatórios exportados (gerados localmente, não precisam ir para o repo)
+relatorios_exportados/
+
+# pytest
+.pytest_cache/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

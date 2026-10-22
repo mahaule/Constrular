@@ -1,0 +1,38 @@
+name: Testes
+
+# Roda em todo push e pull request para as branches main/master,
+# além de poder ser disparado manualmente pela aba "Actions" do GitHub.
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+jobs:
+  testes:
+    name: Testes automatizados (pytest)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Rodar testes de validação (sem depender de banco)
+        run: pytest tests/test_validacoes.py -v
+
+      - name: Verificar sintaxe de todo o projeto
+        run: python -m py_compile $(find . -name "*.py" -not -path "./.venv/*")
