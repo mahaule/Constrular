@@ -1,6 +1,6 @@
 # Constrular — Sistema de Gestão para Loja de Material de Construção
 
-![Testes](https://github.com/SEU_USUARIO/SEU_REPOSITORIO/actions/workflows/tests.yml/badge.svg)
+[![Testes](https://github.com/mahaule/Constrular/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mahaule/Constrular/actions/workflows/tests.yml)
 
 Sistema de linha de comando (CLI) em Python para gestão de uma loja de
 materiais de construção: cadastro de produtos, clientes, fornecedores
